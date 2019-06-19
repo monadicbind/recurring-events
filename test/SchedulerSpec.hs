@@ -5,6 +5,7 @@ module SchedulerSpec
 import Data.Time.Calendar
 import Data.Time.Calendar.OrdinalDate
 import Data.Time.Clock
+import EveryNTimes
 import RecurringEvent
 import RepeatSchedule
 import Scheduler
@@ -114,3 +115,24 @@ spec =
           , fromGregorian 2019 9 1
           , fromGregorian 2019 12 1
           ]
+      it "every alternate day in 30 days" $ do
+        let aDate = fromGregorian 2019 1 1
+        let anotherDate = addDays 30 aDate
+        let alternateEvent =
+              RecurringEvent "alternate-day" aDate anotherDate (EveryXDays (2 :: Int) aDate)
+        let scheduledEvent = scheduleARecurringEvent alternateEvent
+        length (getAllOccurences scheduledEvent) `shouldBe` 16
+      it "every third day in 30 days" $ do
+        let aDate = fromGregorian 2019 1 1
+        let anotherDate = addDays 30 aDate
+        let alternateEvent =
+              RecurringEvent "alternate-day" aDate anotherDate (EveryXDays (3 :: Int) aDate)
+        let scheduledEvent = scheduleARecurringEvent alternateEvent
+        length (getAllOccurences scheduledEvent) `shouldBe` 11
+      it "every day in 30 days" $ do
+        let aDate = fromGregorian 2019 1 1
+        let anotherDate = addDays 30 aDate
+        let alternateEvent =
+              RecurringEvent "everyday-standup" aDate anotherDate (EveryXDays (1 :: Int) aDate)
+        let scheduledEvent = scheduleARecurringEvent alternateEvent
+        length (getAllOccurences scheduledEvent) `shouldBe` 31
