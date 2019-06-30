@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module SchedulerAPISpec
   ( spec
   ) where
@@ -12,5 +14,4 @@ spec =
   describe "SchedulerAPI" $
   describe " Encode " $
   it "stand-up Event to JSON" $
-  encodeEvent (Event (T.pack "Stand-Up") (T.pack "daily")) `shouldBe`
-  T.pack "{\"name\":\"Stand-Up\",\"repeat\":\"daily\"}"
+  encodeEvent (Event "Stand-Up" "daily") `shouldBe` "{\"name\":\"Stand-Up\",\"repeat\":\"daily\"}"

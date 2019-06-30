@@ -29,8 +29,9 @@ class RecurringEventHelper a =>
   getOccurences :: Schedule a -> Int -> [Day]
   getAllOccurences :: Schedule a -> [Day]
 
-instance Scheduler (RecurringEvent a) where
-  startDate (Schedule (RecurringEvent _ stDate _ _)) = stDate
-  endDate (Schedule (RecurringEvent _ _ eDate _)) = eDate
-  getAllOccurences (Schedule re) = getAllOcc re
+instance (RepeatScheduleHelper a) =>
+         Scheduler (RecurringEvent a) where
+  startDate (Schedule re) = RecurringEvent.startDate re
+  endDate (Schedule re) = RecurringEvent.endDate re
+  getAllOccurences (Schedule re) = RecurringEvent.getAllOcc re
   getOccurences schedule n = take n (getAllOccurences schedule)

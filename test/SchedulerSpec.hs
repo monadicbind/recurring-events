@@ -20,10 +20,14 @@ nYearsLaterDate n = addDays (fromIntegral (n * 365))
 
 standUpEvent :: (RecurringEvent RepeatSchedule)
 standUpEvent =
-  RecurringEvent "standup-every-month" today (nYearsLaterDate 3 today) (WeekDayOfMonth [1] Monday)
+  createRecurringEvent
+    "standup-every-month"
+    today
+    (nYearsLaterDate 3 today)
+    (WeekDayOfMonth [1] Monday)
 
 billPayEvent :: (RecurringEvent RepeatSchedule)
-billPayEvent = RecurringEvent "bill-pay" today (nYearsLaterDate 5 today) (DayOfMonth 28)
+billPayEvent = createRecurringEvent "bill-pay" today (nYearsLaterDate 5 today) (DayOfMonth 28)
 
 spec :: Spec
 spec =
@@ -31,10 +35,10 @@ spec =
     describe "startDate" $ do
       it "with a standup event returns the startDate" $ do
         let standUpSchedule = scheduleARecurringEvent standUpEvent
-        startDate standUpSchedule `shouldBe` today
+        Scheduler.startDate standUpSchedule `shouldBe` today
       it "with a billpay event returns the startDate " $ do
         let billPaySchedule = scheduleARecurringEvent standUpEvent
-        startDate billPaySchedule `shouldBe` today
+        Scheduler.startDate billPaySchedule `shouldBe` today
       it "getMonthOfDateWithWeekAndOrdinal and getDayFromTuple list are inverse of each other " $ do
         let anyDate = fromGregorian 2021 02 29
         let todayInternalDate = getMonthOfDateWithWeekAndOrdinal anyDate
@@ -45,7 +49,7 @@ spec =
         let aDate = fromGregorian 2020 1 1
         let anotherDate = addDays 30 aDate
         let standUp =
-              RecurringEvent "standup" aDate anotherDate (WeekDayOfMonth [1, 2, 3, 4] Monday)
+              createRecurringEvent "standup" aDate anotherDate (WeekDayOfMonth [1, 2, 3, 4] Monday)
         let scheduleStandUp = Schedule standUp
         length (getOccurences scheduleStandUp 10) `shouldBe` 4
       it "with standup event for every monday and tuesday of a month" $ do
@@ -54,7 +58,7 @@ spec =
         let standUpEveryMonday = WeekDayOfMonth [1, 2, 3, 4] Monday
         let standUpEveryTuesday = WeekDayOfMonth [1, 2, 3, 4] Tuesday
         let standUp =
-              RecurringEvent
+              createRecurringEvent
                 "standUp"
                 aDate
                 anotherDate
@@ -67,7 +71,7 @@ spec =
         let dayOfMonth = DayOfMonth 2
         let monthNumber = MonthNumber 9
         let event = AndCombinator dayOfMonth monthNumber
-        let anniversary = RecurringEvent "anniversary" aDate anotherDate event
+        let anniversary = createRecurringEvent "anniversary" aDate anotherDate event
         let scheduleAnniversary = scheduleARecurringEvent anniversary
         length (getOccurences scheduleAnniversary 10) `shouldBe` 10
         map ((\(_, b, _) -> b) . toGregorian) (getOccurences scheduleAnniversary 10) `shouldBe`
@@ -80,7 +84,7 @@ spec =
         let yearNumber = YearNumber 2019
         let event = AndCombinator monthNumber dayOfMonth
         let dateEvent = AndCombinator yearNumber event
-        let nonRecurring = RecurringEvent "non-recurring" aDate anotherDate dateEvent
+        let nonRecurring = createRecurringEvent "non-recurring" aDate anotherDate dateEvent
         let scheduleNonrecurring = scheduleARecurringEvent nonRecurring
         length (getOccurences scheduleNonrecurring 10) `shouldBe` 1
         getOccurences scheduleNonrecurring 10 `shouldBe` [fromGregorian 2019 9 2]
@@ -92,7 +96,7 @@ spec =
         let yearNumber = YearNumber 2018
         let event = AndCombinator monthNumber dayOfMonth
         let dateEvent = AndCombinator yearNumber event
-        let nonRecurring = RecurringEvent "non-recurring" aDate anotherDate dateEvent
+        let nonRecurring = createRecurringEvent "non-recurring" aDate anotherDate dateEvent
         let scheduleNonrecurring = scheduleARecurringEvent nonRecurring
         length (getOccurences scheduleNonrecurring 10) `shouldBe` 0
       it "remind every First (1) of every quarter for a year" $ do
@@ -106,7 +110,7 @@ spec =
               OrCombinator
                 firstQuarter
                 (OrCombinator secondQuarter (OrCombinator thirdQuarter fourthQuarter))
-        let event = RecurringEvent "1st every Quarter" aDate anotherDate repeatSchedule
+        let event = createRecurringEvent "1st every Quarter" aDate anotherDate repeatSchedule
         let scheduleEvent = scheduleARecurringEvent event
         length (getOccurences scheduleEvent 10) `shouldBe` 4
         getAllOccurences scheduleEvent `shouldBe`
@@ -119,20 +123,24 @@ spec =
         let aDate = fromGregorian 2019 1 1
         let anotherDate = addDays 30 aDate
         let alternateEvent =
-              RecurringEvent "alternate-day" aDate anotherDate (EveryXDays (2 :: Int) aDate)
+              createRecurringEvent "alternate-day" aDate anotherDate (EveryXDays (2 :: Int) aDate)
         let scheduledEvent = scheduleARecurringEvent alternateEvent
         length (getAllOccurences scheduledEvent) `shouldBe` 16
       it "every third day in 30 days" $ do
         let aDate = fromGregorian 2019 1 1
         let anotherDate = addDays 30 aDate
         let alternateEvent =
-              RecurringEvent "alternate-day" aDate anotherDate (EveryXDays (3 :: Int) aDate)
+              createRecurringEvent "alternate-day" aDate anotherDate (EveryXDays (3 :: Int) aDate)
         let scheduledEvent = scheduleARecurringEvent alternateEvent
         length (getAllOccurences scheduledEvent) `shouldBe` 11
       it "every day in 30 days" $ do
         let aDate = fromGregorian 2019 1 1
         let anotherDate = addDays 30 aDate
         let alternateEvent =
-              RecurringEvent "everyday-standup" aDate anotherDate (EveryXDays (1 :: Int) aDate)
+              createRecurringEvent
+                "everyday-standup"
+                aDate
+                anotherDate
+                (EveryXDays (1 :: Int) aDate)
         let scheduledEvent = scheduleARecurringEvent alternateEvent
         length (getAllOccurences scheduledEvent) `shouldBe` 31

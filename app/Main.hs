@@ -20,6 +20,7 @@ nYearsLaterDate n = addDays (fromIntegral (n * 365))
 quarterly = AndCombinator EveryQuarter (DayOfMonth 1)
 
 scheduleQuartelyEvent =
-  Schedule (RecurringEvent "quarterly" (fromGregorian 2019 1 1) (fromGregorian 2020 1 1) quarterly)
+  Schedule
+    (createRecurringEvent "quarterly" (fromGregorian 2019 1 1) (fromGregorian 2020 1 1) quarterly)
 
 getQuartAllOcc = getAllOccurences scheduleQuartelyEvent
