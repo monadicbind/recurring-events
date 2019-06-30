@@ -4,15 +4,40 @@
 
 ## Prerequisites
 
-1 . Make sure `stack` is installed, on a `mac` this could be done using `brew install stack`
-2. Unzip the folder and run the command `stack build` and later run `stack test` , after making sure you are in a terminal and in the folder of the source.
+* Make sure `stack` is installed, on a `mac` this could be done using
+    ```
+    brew install stack
+    ```
+* Unzip the folder and run the command
+    ```
+    stack build
+    ```
+* Ensure that you are in the terminal and in the folder of the source.
+* Once the libraries are fetched run
+    ```
+       stack test
+     ```
 
 ## Intent
   The intent of building this library in haskell is to show case how relevant it is to think and implement such problems in languages that are lazy and have a functional bent. If the solution provide could showcase the solution in the light of typesafety and extensibility, that would be a win for programming in such kind of languages.
 
 ## Design Thought Process
 
-As part of the design, there are three core ADT's Schedule , RecurringEvent and RepeatSchedule. The RepeatSchedule define when should an event occur. A RecurringEvent has a name , a start date , an end date and the RepeatSchedule. A Schedule is something that has a RecurringEvent.
+When writing the solution in haskell , the contracts are established via TypeClasses and the data structures are ADTs ( Algebraic Data Types).
+
+The three typeclasses that are defined are
+
+* `Scheduler` : This defines the contract that pdf expects one to write.
+* `RecurringEventHelper` : This is a helper contract typeclass which defines a function `getAllOcc`. This is the only function that is needed for all the other functions defined in the `Scheduler` typeclass.
+* `RepeatScheduleHelper` :This is the typeclass where the logic of matching on the repeat schedule needs to be encoded.
+
+As part of the design, there are three core ADT's
+
+* `Schedule`
+* `RecurringEvent`
+* `RepeatSchedule`
+
+The RepeatSchedule define when should an event occur. A RecurringEvent has a name , a start date , an end date and the RepeatSchedule. A Schedule is something that has a RecurringEvent.
 
 The code uses GADTs for describing the ADTs and also uses three type classes to mandate the kind of methods that are required so that the 3 ADTs defined above could work with each other.
 
