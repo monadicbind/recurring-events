@@ -21,6 +21,6 @@ quarterly = AndCombinator EveryQuarter (DayOfMonth 1)
 
 scheduleQuartelyEvent =
   Schedule
-    (createRecurringEvent "quarterly" (fromGregorian 2019 1 1) (fromGregorian 2020 1 1) quarterly)
+    (createRecurringEvent "quarterly" quarterly (fromGregorian 2019 1 1) (fromGregorian 2020 1 1))
 
 getQuartAllOcc = getAllOccurences scheduleQuartelyEvent

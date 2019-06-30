@@ -18,7 +18,7 @@ import RepeatSchedule
 data RecurringEvent a where
         RecurringEvent ::
             RepeatScheduleHelper a =>
-            String -> Day -> Day -> a -> RecurringEvent a
+            String -> a -> Day -> Day -> RecurringEvent a
 
 {-
   This is a way to only expose methods that helps one to
@@ -28,7 +28,7 @@ data RecurringEvent a where
 -}
 createRecurringEvent
   :: RepeatScheduleHelper a
-  => String -> Day -> Day -> a -> RecurringEvent a
+  => String -> a -> Day -> Day -> RecurringEvent a
 createRecurringEvent = RecurringEvent
 
 eventName
@@ -39,21 +39,21 @@ eventName (RecurringEvent name _ _ _) = name
 startDate
   :: RepeatScheduleHelper a
   => RecurringEvent a -> Day
-startDate (RecurringEvent _ stDate _ _) = stDate
+startDate (RecurringEvent _ _ stDate _) = stDate
 
 endDate
   :: RepeatScheduleHelper a
   => RecurringEvent a -> Day
-endDate (RecurringEvent _ _ endDate _) = endDate
+endDate (RecurringEvent _ _ _ endDate) = endDate
 
 repeatSchedule
   :: RepeatScheduleHelper a
   => RecurringEvent a -> a
-repeatSchedule (RecurringEvent _ _ _ a) = a
+repeatSchedule (RecurringEvent _ a _ _) = a
 
 class RecurringEventHelper a where
   getAllOcc :: a -> [Day]
 
 instance RecurringEventHelper (RecurringEvent a) where
-  getAllOcc (RecurringEvent _ startDate endDate repeatSched) =
+  getAllOcc (RecurringEvent _ repeatSched startDate endDate) =
     filter (scheduleLogic repeatSched) [startDate .. endDate]

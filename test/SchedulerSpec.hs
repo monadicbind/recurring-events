@@ -22,12 +22,12 @@ standUpEvent :: (RecurringEvent RepeatSchedule)
 standUpEvent =
   createRecurringEvent
     "standup-every-month"
+    (WeekDayOfMonth [1] Monday)
     today
     (nYearsLaterDate 3 today)
-    (WeekDayOfMonth [1] Monday)
 
 billPayEvent :: (RecurringEvent RepeatSchedule)
-billPayEvent = createRecurringEvent "bill-pay" today (nYearsLaterDate 5 today) (DayOfMonth 28)
+billPayEvent = createRecurringEvent "bill-pay" (DayOfMonth 28) today (nYearsLaterDate 5 today)
 
 spec :: Spec
 spec =
@@ -49,7 +49,7 @@ spec =
         let aDate = fromGregorian 2020 1 1
         let anotherDate = addDays 30 aDate
         let standUp =
-              createRecurringEvent "standup" aDate anotherDate (WeekDayOfMonth [1, 2, 3, 4] Monday)
+              createRecurringEvent "standup" (WeekDayOfMonth [1, 2, 3, 4] Monday) aDate anotherDate
         let scheduleStandUp = Schedule standUp
         length (getOccurences scheduleStandUp 10) `shouldBe` 4
       it "with standup event for every monday and tuesday of a month" $ do
@@ -60,9 +60,9 @@ spec =
         let standUp =
               createRecurringEvent
                 "standUp"
+                (OrCombinator standUpEveryMonday standUpEveryTuesday)
                 aDate
                 anotherDate
-                (OrCombinator standUpEveryMonday standUpEveryTuesday)
         let scheduleStandUp = scheduleARecurringEvent standUp
         length (getOccurences scheduleStandUp 10) `shouldBe` 8
       it "with anniversary of 2nd September" $ do
@@ -71,7 +71,7 @@ spec =
         let dayOfMonth = DayOfMonth 2
         let monthNumber = MonthNumber 9
         let event = AndCombinator dayOfMonth monthNumber
-        let anniversary = createRecurringEvent "anniversary" aDate anotherDate event
+        let anniversary = createRecurringEvent "anniversary" event aDate anotherDate
         let scheduleAnniversary = scheduleARecurringEvent anniversary
         length (getOccurences scheduleAnniversary 10) `shouldBe` 10
         map ((\(_, b, _) -> b) . toGregorian) (getOccurences scheduleAnniversary 10) `shouldBe`
@@ -84,7 +84,7 @@ spec =
         let yearNumber = YearNumber 2019
         let event = AndCombinator monthNumber dayOfMonth
         let dateEvent = AndCombinator yearNumber event
-        let nonRecurring = createRecurringEvent "non-recurring" aDate anotherDate dateEvent
+        let nonRecurring = createRecurringEvent "non-recurring" dateEvent aDate anotherDate
         let scheduleNonrecurring = scheduleARecurringEvent nonRecurring
         length (getOccurences scheduleNonrecurring 10) `shouldBe` 1
         getOccurences scheduleNonrecurring 10 `shouldBe` [fromGregorian 2019 9 2]
@@ -96,7 +96,7 @@ spec =
         let yearNumber = YearNumber 2018
         let event = AndCombinator monthNumber dayOfMonth
         let dateEvent = AndCombinator yearNumber event
-        let nonRecurring = createRecurringEvent "non-recurring" aDate anotherDate dateEvent
+        let nonRecurring = createRecurringEvent "non-recurring" dateEvent aDate anotherDate
         let scheduleNonrecurring = scheduleARecurringEvent nonRecurring
         length (getOccurences scheduleNonrecurring 10) `shouldBe` 0
       it "remind every First (1) of every quarter for a year" $ do
@@ -110,7 +110,7 @@ spec =
               OrCombinator
                 firstQuarter
                 (OrCombinator secondQuarter (OrCombinator thirdQuarter fourthQuarter))
-        let event = createRecurringEvent "1st every Quarter" aDate anotherDate repeatSchedule
+        let event = createRecurringEvent "1st every Quarter" repeatSchedule aDate anotherDate
         let scheduleEvent = scheduleARecurringEvent event
         length (getOccurences scheduleEvent 10) `shouldBe` 4
         getAllOccurences scheduleEvent `shouldBe`
@@ -123,14 +123,14 @@ spec =
         let aDate = fromGregorian 2019 1 1
         let anotherDate = addDays 30 aDate
         let alternateEvent =
-              createRecurringEvent "alternate-day" aDate anotherDate (EveryXDays (2 :: Int) aDate)
+              createRecurringEvent "alternate-day" (EveryXDays (2 :: Int) aDate) aDate anotherDate
         let scheduledEvent = scheduleARecurringEvent alternateEvent
         length (getAllOccurences scheduledEvent) `shouldBe` 16
       it "every third day in 30 days" $ do
         let aDate = fromGregorian 2019 1 1
         let anotherDate = addDays 30 aDate
         let alternateEvent =
-              createRecurringEvent "alternate-day" aDate anotherDate (EveryXDays (3 :: Int) aDate)
+              createRecurringEvent "alternate-day" (EveryXDays (3 :: Int) aDate) aDate anotherDate
         let scheduledEvent = scheduleARecurringEvent alternateEvent
         length (getAllOccurences scheduledEvent) `shouldBe` 11
       it "every day in 30 days" $ do
@@ -139,8 +139,8 @@ spec =
         let alternateEvent =
               createRecurringEvent
                 "everyday-standup"
+                (EveryXDays (1 :: Int) aDate)
                 aDate
                 anotherDate
-                (EveryXDays (1 :: Int) aDate)
         let scheduledEvent = scheduleARecurringEvent alternateEvent
         length (getAllOccurences scheduledEvent) `shouldBe` 31
